@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Изменить</h1>
+    {% if current_user.is_authenticated %}
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+        </form>
+    {% else %}
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <h1> Вы не вошли в аккаунт </h1>
+            <a class="btn btn-dark" href="/login">Войти</a>
+        </form>
+{% endblock %}

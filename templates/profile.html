@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Профиль {{ user.name }}</h1>
+    <form action="" method="post">
+        <img src="http://127.0.0.1:5000/static/img/no-icon.png" align="right" width="140" height="124" />
+        {% if user.is_email_visible %}
+            <h4>Почта</h4> {{ user.email }} <br>
+        {% endif %}
+        {% if user.is_address_visible and user.address %}
+            <h4>Адрес</h4> {{ user.address }} <br>
+        {% endif %}
+        {% if user.about %}
+            <h4>О себе</h4> {{ user.about }} <br>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.name == user.name %}
+            <a href="/edit" class="btn btn-dark">
+                Изменить
+            </a>
+            <a href="/logout" class="btn btn-dark">
+                Выйти
+            </a>
+        {% endif %}
+    </form>
+{% endblock %}

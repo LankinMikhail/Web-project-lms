@@ -2,9 +2,9 @@ from flask import *
 from data import db_session, news_api
 from data.users import User
 from data.news import News
-from forms.user import RegisterForm,LoginForm
+from forms.user import RegisterForm, LoginForm
 from forms.news import NewsForm
-from flask_login import LoginManager,login_user, login_required,logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from sa.data.news_api import blueprint
 from requests import get
 
@@ -24,7 +24,6 @@ def main():
     db_session.global_init("db/blogs.db")
     app.register_blueprint(news_api.blueprint)
     app.run()
-    db_sess = db_session.create_session()
 
 
 @app.route("/")
@@ -51,11 +50,16 @@ def reqister():
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация',
                                    form=form,
-                                   message="Такой пользователь уже есть")
+                                   message="Пользователь с такой почтой уже есть")
+        if db_sess.query(User).filter(User.name == form.name.data).first():
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Пользователь с таким именем уже есть")
         user = User(
             name=form.name.data,
             email=form.email.data,
-            about=form.about.data
+            about=form.about.data,
+            address=form.address.data
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -81,12 +85,20 @@ def cookie_test():
     return res
 
 
+@app.route("/profile/<name>")
+def profile(name):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.name == name).first()
+    return render_template("profile.html", user=user)
+
+
 @app.route("/session_test")
 def session_test():
     visits_count = session.get('visits_count', 0)
     session['visits_count'] = visits_count + 1
     return make_response(
         f"Вы пришли на эту страницу {visits_count + 1} раз")
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
