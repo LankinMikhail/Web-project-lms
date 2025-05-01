@@ -13,12 +13,17 @@
         {% if user.about %}
             <h4>О себе</h4> {{ user.about }} <br>
         {% endif %}
+        <br>
         {% if current_user.is_authenticated and current_user.name == user.name %}
             <a href="/edit" class="btn btn-dark">
                 Изменить
             </a>
             <a href="/logout" class="btn btn-dark">
                 Выйти
+            </a>
+        <a href="delete.php?id=22" onclick="return confirm('Are you sure?')">Link</a>
+            <a href="/#" class="btn btn-danger">
+                Удалить
             </a>
         {% endif %}
     </form>

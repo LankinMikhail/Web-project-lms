@@ -2,11 +2,9 @@ from flask import *
 from data import db_session, news_api
 from data.users import User
 from data.news import News
-from forms.user import RegisterForm, LoginForm
+from forms.user import RegisterForm, LoginForm, EditForm
 from forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from sa.data.news_api import blueprint
-from requests import get
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -29,7 +27,6 @@ def main():
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
-
     if current_user.is_authenticated:
         news = db_sess.query(News).filter(
             (News.user == current_user) | (News.is_private != True))
@@ -68,21 +65,32 @@ def reqister():
     return render_template('register.html', title='Регистрация', form=form)
 
 
-@app.route("/cookie_test")
-def cookie_test():
-    visits_count = int(request.cookies.get("visits_count", 0))
-    if visits_count:
-        res = make_response(
-            f"Вы пришли на эту страницу {visits_count + 1} раз")
-        res.set_cookie("visits_count", str(visits_count + 1),
-                       max_age=60 * 60 * 24 * 365 * 2)
-    else:
-        res = make_response(
-            "Вы пришли на эту страницу в первый раз за последние 2 года")
-        res.set_cookie("visits_count", '1',
-                       max_age=60 * 60 * 24 * 365 * 2)
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def edit():
+    form = EditForm()
+    form.email.default = current_user.email
+    form.address.default = current_user.address
+    form.about.default = current_user.about
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        if db_sess.query(User).filter(User.email == form.email.data).first() and form.email.data != current_user.email:
+            return render_template('edit.html', title='Регистрация',
+                                   form=form,
+                                   message="Пользователь с такой почтой уже есть")
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+        user.email = form.email.data
+        user.about = form.about.data
+        user.address = form.address.data
+        db_sess.commit()
+        return redirect(f'/profile/{current_user.name}')
+    return render_template("edit.html", title="Изменить", form=form)
 
-    return res
+
+@app.route('/delete', methods=['GET', 'POST'])
+@login_required
+def delete():
+    pass
 
 
 @app.route("/profile/<name>")
@@ -90,14 +98,6 @@ def profile(name):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.name == name).first()
     return render_template("profile.html", user=user)
-
-
-@app.route("/session_test")
-def session_test():
-    visits_count = session.get('visits_count', 0)
-    session['visits_count'] = visits_count + 1
-    return make_response(
-        f"Вы пришли на эту страницу {visits_count + 1} раз")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -136,8 +136,7 @@ def add_news():
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
-    return render_template('news.html', title='Добавление новости',
-                           form=form)
+    return render_template('news.html', title='Добавление новости', form=form)
 
 
 @app.route('/news/<int:id>', methods=['GET', 'POST'])
