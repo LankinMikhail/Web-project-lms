@@ -90,14 +90,19 @@ def edit():
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required
 def delete():
-    pass
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == current_user.id).first()
+    logout_user()
+    db_sess.delete(user)
+    db_sess.commit()
+    return redirect("/")
 
 
 @app.route("/profile/<name>")
 def profile(name):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.name == name).first()
-    return render_template("profile.html", user=user)
+    return render_template("profile.html", user=user, created_date=user.created_date.date())
 
 
 @app.route('/login', methods=['GET', 'POST'])
