@@ -5,6 +5,8 @@ from data.news import News
 from forms.user import RegisterForm, LoginForm, EditForm
 from forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from wtforms import PasswordField, StringField, TextAreaField, SubmitField, EmailField, BooleanField
+from wtforms.validators import DataRequired
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -32,7 +34,7 @@ def index():
             (News.user == current_user) | (News.is_private != True))
     else:
         news = db_sess.query(News).filter(News.is_private != True)
-    return render_template("index.html", news=news)
+    return render_template("index.html", news=news, title="BAZAR")
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -40,16 +42,16 @@ def reqister():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title="BAZAR",
                                    form=form,
                                    message="Пароли не совпадают")
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title="BAZAR",
                                    form=form,
                                    message="Пользователь с такой почтой уже есть")
         if db_sess.query(User).filter(User.name == form.name.data).first():
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title="BAZAR",
                                    form=form,
                                    message="Пользователь с таким именем уже есть")
         user = User(
@@ -62,16 +64,13 @@ def reqister():
         db_sess.add(user)
         db_sess.commit()
         return redirect('/login')
-    return render_template('register.html', title='Регистрация', form=form)
+    return render_template('register.html', title="BAZAR", form=form)
 
 
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
     form = EditForm()
-    form.email.default = current_user.email
-    form.address.default = current_user.address
-    form.about.default = current_user.about
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first() and form.email.data != current_user.email:
@@ -84,7 +83,7 @@ def edit():
         user.address = form.address.data
         db_sess.commit()
         return redirect(f'/profile/{current_user.name}')
-    return render_template("edit.html", title="Изменить", form=form)
+    return render_template("edit.html", title="BAZAR", form=form)
 
 
 @app.route('/delete', methods=['GET', 'POST'])
@@ -102,7 +101,8 @@ def delete():
 def profile(name):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.name == name).first()
-    return render_template("profile.html", user=user, created_date=user.created_date.date())
+    return render_template("profile.html", user=user, created_date=user.created_date.date(),
+                           title="BAZAR")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -114,9 +114,8 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
-        return render_template('login.html',
-                               message="Неправильный логин или пароль",
-                               form=form)
+        return render_template('login.html', message="Неправильный логин или пароль", form=form,
+                               title="BAZAR")
     return render_template('login.html', title='Авторизация', form=form)
 
 

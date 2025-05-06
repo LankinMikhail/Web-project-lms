@@ -25,4 +25,3 @@ class EditForm(FlaskForm):
     email = EmailField('Почта', validators=[DataRequired()])
     about = TextAreaField("Немного о себе")
     submit = SubmitField('Изменить')
-
