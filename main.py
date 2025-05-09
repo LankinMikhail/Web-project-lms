@@ -5,8 +5,6 @@ from data.news import News
 from forms.user import RegisterForm, LoginForm, EditForm
 from forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from wtforms import PasswordField, StringField, TextAreaField, SubmitField, EmailField, BooleanField
-from wtforms.validators import DataRequired
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -29,12 +27,8 @@ def main():
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
-    if current_user.is_authenticated:
-        news = db_sess.query(News).filter(
-            (News.user == current_user) | (News.is_private != True))
-    else:
-        news = db_sess.query(News).filter(News.is_private != True)
-    return render_template("index.html", news=news, title="BAZAR")
+    trades = db_sess.query(News).all()
+    return render_template("index.html", trades=trades)
 
 
 @app.route('/register', methods=['GET', 'POST'])
