@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>Товар {{ trade.item }}</h1>
-    <img src="http://127.0.0.1:5000/static/img/no-icon.png" width="140" height="124" />
+    <img src="http://127.0.0.1:5000/static/img/no-icon.png" width="180" height="180" />
     {% if trade.description %}
         <h4>Описание</h4> {{ trade.description }} <br>
     {% endif %}
@@ -11,10 +11,10 @@
     Продавец: <a href="/profile/{{ trade.user.name }}"> {{ trade.user.name }} </a> <br>
     <span style="font-size: small; "> Выложено {{ created_date }} </span><br>
     {% if current_user.is_authenticated and current_user.id == trade.seller_id %}
-        <a href="/trades/{{ trade.id }}" class="btn btn-dark">
+        <a href="/edit_trade/{{ trade.id }}" class="btn btn-dark">
             Изменить
         </a>
-        <a href="/trade_delete" class="btn btn-danger" onclick="return confirm('Вы уверены в том, что хотите товар?')">
+        <a href="/delete_trade/{{ trade.id }}" class="btn btn-danger" onclick="return confirm('Вы уверены в том, что хотите товар?')">
             Удалить
         </a>
     {% endif %}

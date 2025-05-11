@@ -14,6 +14,7 @@
                     </p>
                 {% endfor %}
             </p>
+            <p>{{ form.is_address_visible() }} {{ form.is_address_visible.label }}</p>
             <p>
                 {{ form.email.label }}<br>
                 {{ form.email(class="form-control", type="email") }}<br>
@@ -23,6 +24,7 @@
                     </p>
                 {% endfor %}
             </p>
+            <p>{{ form.is_email_visible() }} {{ form.is_email_visible.label }}</p>
             <p>
                 {{ form.about.label }}<br>
                 {{ form.about(class="form-control") }}<br>

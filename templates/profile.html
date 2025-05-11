@@ -3,19 +3,22 @@
 {% block content %}
     <h1>Профиль {{ user.name }}</h1>
     {% if avatar_exists %}
-        <img src="http://127.0.0.1:5000/static/img/avatars/{{ user.name }}" align="right" width="180" height="164" />
+        <img src="http://127.0.0.1:5000/static/img/avatars/{{ user.name }}" align="right" width="180" height="180" />
     {% else %}
-        <img src="http://127.0.0.1:5000/static/img/no-icon.png" align="right" width="140" height="164" />
+        <img src="http://127.0.0.1:5000/static/img/no-icon.png" align="right" width="180" height="180" />
     {% endif %}
-    {% if user.is_email_visible %}
+
+    {% if user.is_email_visible or (current_user.is_authenticated and current_user.id == user.id) %}
         <h4>Почта</h4> {{ user.email }} <br>
     {% endif %}
-    {% if user.is_address_visible and user.address %}
+    {% if (user.is_address_visible or (current_user.is_authenticated and current_user.id == user.id)) and user.address %}
         <h4>Адрес</h4> {{ user.address }} <br>
     {% endif %}
+
     {% if user.about %}
         <h4>О себе</h4> {{ user.about }} <br>
     {% endif %}
+
     <span style="font-size: small; "> Зарегистрирован {{ created_date }} </span><br>
     <br>
     {% if current_user.is_authenticated and current_user.id == user.id %}
@@ -27,17 +30,23 @@
         </a>
         <a href="/delete" class="btn btn-danger" onclick="return confirm('Вы уверены в том, что хотите удалить аккаунт?')">
             Удалить
-        </a>
+        </a> <br>
     {% endif %}
     <br>
+    <h2> Товары пользователя </h2>
+    {% if current_user.is_authenticated and current_user.id == user.id %}
+        <a href="/add_trade" class="btn btn-dark">
+            Добавить Товар
+        </a> <br> <br>
+    {% endif %}
     {% if user.trades %}
-        <h2> Товары пользователя </h2>
         {% for item in user.trades %}
-        <br>
         <div class="col-md6 border rounded">
             <a href="/trade/{{ item.id }}"><h2>{{item.item}}</h2></a>
             <div> {{item.description}} </div>
-        </div>
+        </div> <br>
         {% endfor %}
+    {% else %}
+      <h4> Здесь пока ничего нет </h4>
     {% endif %}
 {% endblock %}

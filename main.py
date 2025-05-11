@@ -51,12 +51,13 @@ def reqister():
         if db_sess.query(User).filter(User.name == form.name.data).first():
             return render_template('register.html', form=form,
                                    message="Пользователь с таким именем уже есть")
-        user = User(
-            name=form.name.data,
-            email=form.email.data,
-            about=form.about.data,
-            address=form.address.data
-        )
+        user = User()
+        user.name = form.name.data
+        user.email = form.email.data
+        user.about = form.about.data
+        user.address = form.address.data
+        user.is_address_visible = form.is_address_visible
+        user.is_email_visible = form.is_email_visible
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
@@ -68,21 +69,38 @@ def reqister():
 @login_required
 def edit():
     form = EditForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+        if user:
+            form.address.data = user.address
+            form.email.data = user.email
+            form.about.data = user.about
+            form.is_email_visible.data = user.is_email_visible
+            form.is_address_visible.data = user.is_address_visible
+        else:
+            abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        if db_sess.query(User).filter(User.email == form.email.data).first() and form.email.data != current_user.email:
+        if (db_sess.query(User).filter(User.email == form.email.data).first() and
+                form.email.data != current_user.email):
             return render_template('edit.html', form=form,
                                    message="Пользователь с такой почтой уже есть")
         user = db_sess.query(User).filter(User.id == current_user.id).first()
-        user.email = form.email.data
-        user.about = form.about.data
-        user.address = form.address.data
-        file = request.files["avatar"]
-        if file and allowed_file(file.filename):
-            path = os.path.join("static/img/avatars")
-            file.save(path + '/' + current_user.name)
-        db_sess.commit()
-        return redirect(f'/profile/{current_user.name}')
+        if user:
+            user.email = form.email.data
+            user.about = form.about.data
+            user.address = form.address.data
+            user.is_email_visible = form.is_email_visible.data
+            user.is_address_visible = form.is_address_visible.data
+            file = request.files["avatar"]
+            if file and allowed_file(file.filename):
+                path = os.path.join("static/img/avatars")
+                file.save(path + '/' + current_user.name)
+            db_sess.commit()
+            return redirect(f'/profile/{current_user.name}')
+        else:
+            abort(404)
     return render_template("edit.html", form=form)
 
 
@@ -101,7 +119,8 @@ def delete():
 def profile(name):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.name == name).first()
-    return render_template("profile.html", user=user, created_date=user.created_date.date(),
+    return render_template("profile.html", user=user,
+                           created_date=user.created_date.date(),
                            avatar_exists=os.path.exists(f"static/img/avatars/{user.name}"))
 
 
@@ -114,7 +133,8 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
-        return render_template('login.html', message="Неправильный логин или пароль", form=form)
+        return render_template('login.html',
+                               message="Неправильный логин или пароль", form=form)
     return render_template('login.html', form=form)
 
 
@@ -122,7 +142,8 @@ def login():
 def trades(id):
     db_sess = db_session.create_session()
     trade = db_sess.query(Trade).filter(Trade.id == id).first()
-    return render_template('trade.html', trade=trade, created_date=trade.created_date.date())
+    return render_template('trade.html',
+                           trade=trade, created_date=trade.created_date.date())
 
 
 @app.route('/add_trade', methods=['GET', 'POST'])
@@ -142,7 +163,56 @@ def add_trade():
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
-    return render_template('trade_bd.html', form=form)
+    return render_template('trade_bd.html',
+                           form=form, title="Добавление товара")
+
+
+@app.route('/edit_trade/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_trade(id):
+    form = TradeForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        trade = db_sess.query(Trade).filter(Trade.id == id,
+                                            Trade.seller_id == current_user.id).first()
+        if trade:
+            form.item.data = trade.item
+            form.description.data = trade.description
+            form.category.data = trade.category
+            form.cost.data = trade.cost
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        trade = db_sess.query(Trade).filter(Trade.id == id,
+                                            Trade.seller_id == current_user.id).first()
+        if trade:
+            trade.item = form.item.data,
+            trade.description = form.description.data,
+            trade.seller_id = current_user.id,
+            trade.category = form.category.data,
+            trade.cost = form.cost.data
+            current_user.trades.append(trade)
+            db_sess.merge(current_user)
+            db_sess.commit()
+            return redirect('/')
+        else:
+            abort(404)
+    return render_template('trade_bd.html', form=form, title="Изменение товара")
+
+
+@app.route('/delete_trade/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_trade(id):
+    db_sess = db_session.create_session()
+    trade = db_sess.query(Trade).filter(Trade.id == id,
+                                       Trade.seller_id == current_user.id).first()
+    if trade:
+        db_sess.delete(trade)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
 
 
 @app.route('/logout')
