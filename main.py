@@ -6,7 +6,6 @@ from data.trades import Trade
 from forms.user import RegisterForm, LoginForm, EditForm
 from forms.trade import TradeForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
