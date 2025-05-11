@@ -2,8 +2,9 @@ from flask import *
 from data import db_session, news_api
 from data.users import User
 from data.news import News
+from data.trades import Trade
 from forms.user import RegisterForm, LoginForm, EditForm
-from forms.news import NewsForm
+from forms.trade import TradeForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
@@ -110,7 +111,29 @@ def login():
             return redirect("/")
         return render_template('login.html', message="Неправильный логин или пароль", form=form,
                                title="BAZAR")
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template('login.html', title='BAZAR', form=form)
+
+
+@app.route('/trade', methods=['GET', 'POST'])
+@login_required
+def add_trade():
+    form = TradeForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        trade = Trade(
+            item=form.item.data,
+            description=form.description.data,
+            seller_id=current_user.id,
+            category=form.category.data,
+            cost=form.cost.data
+        )
+        current_user.trades.append(trade)
+        db_sess.merge(current_user)
+        db_sess.commit()
+        return redirect('/')
+    return render_template('trades.html', title='BAZAR',
+                           form=form)
+
 
 
 @app.route('/logout')

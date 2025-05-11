@@ -11,6 +11,7 @@ class TradeForm(FlaskForm):
     item = StringField("Товар", validators=[DataRequired()])
     description = TextAreaField("Описание")
     seller = StringField("Продавец", validators=[DataRequired()])
-    category = SelectField("Категория", default="Другое")
+    category = SelectField("Категория", choices=[("Другое", "другое"), ("Услуга", "услуга"),
+                                                 ("Одежда", "одежда"), ("Техника", "техника"), ], default="Другое")
     cost = IntegerField("Цена", validators=[DataRequired()])
     submit = SubmitField('Применить')

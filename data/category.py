@@ -1,7 +1,6 @@
 import sqlalchemy
 from .db_session import SqlAlchemyBase
 
-
 association_table = sqlalchemy.Table(
     'association',
     SqlAlchemyBase.metadata,
@@ -10,6 +9,7 @@ association_table = sqlalchemy.Table(
     sqlalchemy.Column('category', sqlalchemy.Integer,
                       sqlalchemy.ForeignKey('category.id'))
 )
+
 
 class Category(SqlAlchemyBase):
     __tablename__ = 'category'

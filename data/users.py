@@ -23,7 +23,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     is_email_visible = sqlalchemy.Column(sqlalchemy.Boolean, default=1)
     is_address_visible = sqlalchemy.Column(sqlalchemy.Boolean, default=1)
 
-    news = orm.relationship("News", back_populates='user')
+    trades = orm.relationship("Trade", back_populates='user')
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
