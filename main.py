@@ -38,7 +38,7 @@ def index():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
@@ -56,8 +56,8 @@ def reqister():
         user.email = form.email.data
         user.about = form.about.data
         user.address = form.address.data
-        user.is_address_visible = form.is_address_visible
-        user.is_email_visible = form.is_email_visible
+        user.is_address_visible = bool(form.is_address_visible)
+        user.is_email_visible = bool(form.is_email_visible)
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()

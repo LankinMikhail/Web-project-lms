@@ -25,4 +25,3 @@ class Trade(SqlAlchemyBase, SerializerMixin):
     categories = orm.relationship("Category",
                                   secondary="association",
                                   backref="trades")
-
