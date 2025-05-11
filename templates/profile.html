@@ -14,7 +14,7 @@
     {% endif %}
     <span style="font-size: small; "> Зарегистрирован {{ created_date }} </span><br>
     <br>
-    {% if current_user.is_authenticated and current_user.name == user.name %}
+    {% if current_user.is_authenticated and current_user.id == user.id %}
         <a href="/edit" class="btn btn-dark">
             Изменить
         </a>
@@ -24,5 +24,16 @@
         <a href="/delete" class="btn btn-danger" onclick="return confirm('Вы уверены в том, что хотите удалить аккаунт?')">
             Удалить
         </a>
+    {% endif %}
+    <br>
+    {% if user.trades %}
+        <h2> Товары пользователя </h2>
+        {% for item in user.trades %}
+        <br>
+        <div class="col-md6 border rounded">
+            <a href="/trade/{{ item.id }}"><h2>{{item.item}}</h2></a>
+            <div> {{item.description}} </div>
+        </div>
+        {% endfor %}
     {% endif %}
 {% endblock %}

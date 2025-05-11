@@ -10,8 +10,7 @@ from wtforms.validators import DataRequired
 class TradeForm(FlaskForm):
     item = StringField("Товар", validators=[DataRequired()])
     description = TextAreaField("Описание")
-    seller = StringField("Продавец", validators=[DataRequired()])
-    category = SelectField("Категория", choices=[("Другое", "другое"), ("Услуга", "услуга"),
-                                                 ("Одежда", "одежда"), ("Техника", "техника"), ], default="Другое")
+    category = SelectField("Категория", choices=[("Другое", "Другое"), ("Услуга", "Услуга"),
+                                                 ("Одежда", "Одежда"), ("Техника", "Техника"), ], default="Другое")
     cost = IntegerField("Цена", validators=[DataRequired()])
     submit = SubmitField('Применить')
