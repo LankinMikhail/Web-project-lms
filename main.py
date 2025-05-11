@@ -1,7 +1,6 @@
 from flask import *
-from data import db_session, news_api
+from data import db_session
 from data.users import User
-from data.news import News
 from data.trades import Trade
 from forms.user import RegisterForm, LoginForm, EditForm
 from forms.trade import TradeForm
@@ -21,7 +20,6 @@ def load_user(user_id):
 
 def main():
     db_session.global_init("db/blogs.db")
-    app.register_blueprint(news_api.blueprint)
     app.run()
 
 

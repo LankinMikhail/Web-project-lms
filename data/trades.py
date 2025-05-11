@@ -21,3 +21,8 @@ class Trade(SqlAlchemyBase, SerializerMixin):
                                      default=datetime.datetime.now)
 
     user = orm.relationship('User')
+
+    categories = orm.relationship("Category",
+                                  secondary="association",
+                                  backref="trades")
+
