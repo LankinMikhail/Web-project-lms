@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, TextAreaField, SubmitField, EmailField, BooleanField
+from wtforms import PasswordField, StringField, TextAreaField, SubmitField, EmailField, BooleanField, FileField
 from wtforms.validators import DataRequired
 
 
@@ -21,7 +21,8 @@ class LoginForm(FlaskForm):
 
 
 class EditForm(FlaskForm):
-    address = StringField("Адрес", validators=[DataRequired()])
+    address = StringField("Адрес")
     email = EmailField('Почта', validators=[DataRequired()])
     about = TextAreaField("Немного о себе")
+    avatar = FileField("Загрузите аватар")
     submit = SubmitField('Изменить')

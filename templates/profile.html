@@ -2,7 +2,11 @@
 
 {% block content %}
     <h1>Профиль {{ user.name }}</h1>
-    <img src="http://127.0.0.1:5000/static/img/no-icon.png" align="right" width="140" height="124" />
+    {% if avatar_exists %}
+        <img src="http://127.0.0.1:5000/static/img/avatars/{{ user.name }}" align="right" width="180" height="164" />
+    {% else %}
+        <img src="http://127.0.0.1:5000/static/img/no-icon.png" align="right" width="140" height="164" />
+    {% endif %}
     {% if user.is_email_visible %}
         <h4>Почта</h4> {{ user.email }} <br>
     {% endif %}

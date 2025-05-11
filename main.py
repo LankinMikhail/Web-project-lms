@@ -1,3 +1,4 @@
+import os
 from flask import *
 from data import db_session, news_api
 from data.users import User
@@ -6,11 +7,18 @@ from data.trades import Trade
 from forms.user import RegisterForm, LoginForm, EditForm
 from forms.trade import TradeForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}  # разрешённые форматы файлов
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @login_manager.user_loader
@@ -72,6 +80,10 @@ def edit():
         user.email = form.email.data
         user.about = form.about.data
         user.address = form.address.data
+        file = request.files["avatar"]
+        if file and allowed_file(file.filename):
+            path = os.path.join("static/img/avatars")
+            file.save(path + '/' + current_user.name)
         db_sess.commit()
         return redirect(f'/profile/{current_user.name}')
     return render_template("edit.html", form=form)
@@ -92,7 +104,8 @@ def delete():
 def profile(name):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.name == name).first()
-    return render_template("profile.html", user=user, created_date=user.created_date.date())
+    return render_template("profile.html", user=user, created_date=user.created_date.date(),
+                           avatar_exists=os.path.exists(f"static/img/avatars/{user.name}"))
 
 
 @app.route('/login', methods=['GET', 'POST'])
