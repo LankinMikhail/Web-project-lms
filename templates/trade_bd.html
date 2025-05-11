@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-<form action="" method="post">
+<form action="" method="post" enctype=multipart/form-data>
     {{ form.hidden_tag() }}
     <p>
         {{ form.item.label }}<br>
@@ -39,6 +39,10 @@
                 {{ error }}
             </p>
         {% endfor %}
+    </p>
+    <p>
+        {{ form.image.label }} <br>
+        {{ form.image(type="file") }}
     </p>
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}

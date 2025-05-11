@@ -2,7 +2,11 @@
 
 {% block content %}
     <h1>Товар {{ trade.item }}</h1>
-    <img src="http://127.0.0.1:5000/static/img/no-icon.png" width="180" height="180" />
+    {% if image_exists %}
+        <img src="http://127.0.0.1:5000/static/img/trades/{{ trade.id }}" width="180" height="180" />
+    {% else %}
+        <img src="http://127.0.0.1:5000/static/img/no-icon.png" width="180" height="180" />
+    {% endif %}
     {% if trade.description %}
         <h4>Описание</h4> {{ trade.description }} <br>
     {% endif %}

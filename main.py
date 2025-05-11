@@ -96,6 +96,8 @@ def edit():
             file = request.files["avatar"]
             if file and allowed_file(file.filename):
                 path = os.path.join("static/img/avatars")
+                if not os.path.exists(path):
+                    os.mkdir(path)
                 file.save(path + '/' + current_user.name)
             db_sess.commit()
             return redirect(f'/profile/{current_user.name}')
@@ -143,7 +145,8 @@ def trades(id):
     db_sess = db_session.create_session()
     trade = db_sess.query(Trade).filter(Trade.id == id).first()
     return render_template('trade.html',
-                           trade=trade, created_date=trade.created_date.date())
+                           trade=trade, created_date=trade.created_date.date(),
+                           image_exists=os.path.exists(f"static/img/trades/{trade.id}"))
 
 
 @app.route('/add_trade', methods=['GET', 'POST'])
@@ -152,13 +155,18 @@ def add_trade():
     form = TradeForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        trade = Trade(
-            item=form.item.data,
-            description=form.description.data,
-            seller_id=current_user.id,
-            category=form.category.data,
-            cost=form.cost.data
-        )
+        trade = Trade()
+        trade.item = form.item.data
+        trade.description = form.description.data
+        trade.seller_id = current_user.id
+        trade.category = form.category.data
+        trade.cost = form.cost.data
+        file = request.files["image"]
+        if file and allowed_file(file.filename):
+            path = os.path.join("static/img/trades")
+            if not os.path.exists(path):
+                os.mkdir(path)
+            file.save(f"{path}/{trade.id}")
         current_user.trades.append(trade)
         db_sess.merge(current_user)
         db_sess.commit()
@@ -187,13 +195,17 @@ def edit_trade(id):
         trade = db_sess.query(Trade).filter(Trade.id == id,
                                             Trade.seller_id == current_user.id).first()
         if trade:
-            trade.item = form.item.data,
-            trade.description = form.description.data,
-            trade.seller_id = current_user.id,
-            trade.category = form.category.data,
+            trade.item = form.item.data
+            trade.description = form.description.data
+            trade.seller_id = current_user.id
+            trade.category = form.category.data
             trade.cost = form.cost.data
-            current_user.trades.append(trade)
-            db_sess.merge(current_user)
+            file = request.files["image"]
+            if file and allowed_file(file.filename):
+                path = os.path.join("static/img/trades")
+                if not os.path.exists(path):
+                    os.mkdir(path)
+                file.save(f"{path}/{trade.id}")
             db_sess.commit()
             return redirect('/')
         else:
