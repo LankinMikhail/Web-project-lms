@@ -26,6 +26,9 @@ def load_user(user_id):
 
 
 def main():
+    path = os.path.join("db")
+    if not os.path.exists(path):
+        os.mkdir(path)
     db_session.global_init("db/blogs.db")
     app.run()
 
@@ -98,7 +101,9 @@ def edit():
                 path = os.path.join("static/img/avatars")
                 if not os.path.exists(path):
                     os.mkdir(path)
-                file.save(path + '/' + current_user.name)
+                if os.path.exists(f"{path}/{current_user.name}"):
+                    os.remove(f"{path}/{current_user.name}")
+                file.save(f"{path}/{current_user.name}")
             db_sess.commit()
             return redirect(f'/profile/{current_user.name}')
         else:
@@ -141,7 +146,7 @@ def login():
 
 
 @app.route('/trade/<int:id>')
-def trades(id):
+def trade(id):
     db_sess = db_session.create_session()
     trade = db_sess.query(Trade).filter(Trade.id == id).first()
     return render_template('trade.html',
@@ -161,15 +166,20 @@ def add_trade():
         trade.seller_id = current_user.id
         trade.category = form.category.data
         trade.cost = form.cost.data
+        if form.cost.data <= 0:
+            return render_template('trade_bd.html', form=form,
+                                   title="Добавление товара", message="Цена может быть только положительной")
+        current_user.trades.append(trade)
+        db_sess.merge(current_user)
+        db_sess.commit()
         file = request.files["image"]
         if file and allowed_file(file.filename):
             path = os.path.join("static/img/trades")
             if not os.path.exists(path):
                 os.mkdir(path)
+            if os.path.exists(f"{path}/{trade.id}"):
+                os.remove(f"{path}/{trade.id}")
             file.save(f"{path}/{trade.id}")
-        current_user.trades.append(trade)
-        db_sess.merge(current_user)
-        db_sess.commit()
         return redirect('/')
     return render_template('trade_bd.html',
                            form=form, title="Добавление товара")
@@ -200,11 +210,16 @@ def edit_trade(id):
             trade.seller_id = current_user.id
             trade.category = form.category.data
             trade.cost = form.cost.data
+            if form.cost.data <= 0:
+                return render_template('trade_bd.html', form=form,
+                                       title="Добавление товара", message="Цена может быть только положительной")
             file = request.files["image"]
             if file and allowed_file(file.filename):
                 path = os.path.join("static/img/trades")
                 if not os.path.exists(path):
                     os.mkdir(path)
+                if os.path.exists(f"{path}/{trade.id}"):
+                    os.remove(f"{path}/{trade.id}")
                 file.save(f"{path}/{trade.id}")
             db_sess.commit()
             return redirect('/')
@@ -218,7 +233,7 @@ def edit_trade(id):
 def delete_trade(id):
     db_sess = db_session.create_session()
     trade = db_sess.query(Trade).filter(Trade.id == id,
-                                       Trade.seller_id == current_user.id).first()
+                                        Trade.seller_id == current_user.id).first()
     if trade:
         db_sess.delete(trade)
         db_sess.commit()
