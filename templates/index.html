@@ -6,21 +6,12 @@
 <div class="col-md6 border rounded">
     <a href="/trade/{{ item.id }}"><h2>{{item.item}}</h2></a>
     <div>
-        {{item.description}}
+        {% if item.description %}
+            {{ item.description }}<br>
+        {% endif %}
+        Продавец: {{item.user.name}} <br>
+        Стоимость: {{item.cost}} <br>
     </div>
-    <div>
-        Продавец - {{item.user.name}}
-    </div>
-    {% if current_user.is_authenticated and current_user == item.seller %}
-        <div>
-            <a href="/trade/{{ item.id }}" class="btn btn-warning">
-                Изменить
-            </a>
-            <a href="/trade_delete/{{ item.id }}" class="btn btn-danger">
-                Удалить
-            </a>
-        </div>
-    {% endif %}
 </div>
 {% endfor %}
 {% endblock %}

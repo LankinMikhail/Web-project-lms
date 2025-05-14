@@ -8,45 +8,54 @@
         <img src="http://127.0.0.1:5000/static/img/no-icon.png" align="right" width="180" height="180" />
     {% endif %}
 
-    {% if user.is_email_visible or (current_user.is_authenticated and current_user.id == user.id) %}
-        <h4>Почта</h4> {{ user.email }} <br>
-    {% endif %}
-    {% if (user.is_address_visible or (current_user.is_authenticated and current_user.id == user.id)) and user.address %}
-        <h4>Адрес</h4> {{ user.address }} <br>
-    {% endif %}
+    <div>
+        {% if user.is_email_visible or (current_user.is_authenticated and current_user.id == user.id) %}
+            <h4>Почта</h4> {{ user.email }} <br>
+        {% endif %}
+        {% if (user.is_address_visible or (current_user.is_authenticated and current_user.id == user.id)) and user.address %}
+            <h4>Адрес</h4> {{ user.address }} <br>
+        {% endif %}
 
-    {% if user.about %}
-        <h4>О себе</h4> {{ user.about }} <br>
-    {% endif %}
+        {% if user.about %}
+            <h4>О себе</h4> {{ user.about }} <br>
+        {% endif %}
 
-    <span style="font-size: small; "> Зарегистрирован {{ created_date }} </span><br>
-    <br>
-    {% if current_user.is_authenticated and current_user.id == user.id %}
-        <a href="/edit" class="btn btn-dark">
-            Изменить
-        </a>
-        <a href="/logout" class="btn btn-dark">
-            Выйти
-        </a>
-        <a href="/delete" class="btn btn-danger" onclick="return confirm('Вы уверены в том, что хотите удалить аккаунт?')">
-            Удалить
-        </a> <br>
+        <span style="font-size: small; "> Зарегистрирован {{ created_date }} </span><br><br>
+        {% if current_user.is_authenticated and current_user.id == user.id %}
+            <a href="/edit" class="btn btn-dark">
+                Изменить
+            </a>
+            <a href="/logout" class="btn btn-dark">
+                Выйти
+            </a>
+            <a href="/delete" class="btn btn-danger" onclick="return confirm('Вы уверены в том, что хотите удалить аккаунт?')">
+                Удалить
+            </a> <br>
+        {% endif %}
+        <br>
+    </div>
+    <div align="center">
+        <h2> Товары пользователя </h2>
+        {% if current_user.is_authenticated and current_user.id == user.id %}
+            <a href="/add_trade" class="btn btn-dark">
+                Добавить Товар
+            </a> <br> <br>
+        {% endif %}
+        {% if user.trades %}
+            {% for item in user.trades %}
+            <br> <div class="col-md6 border rounded" align="left">
+                <a href="/trade/{{ item.id }}"><h2>{{item.item}}</h2></a>
+                <div>
+                    {% if item.description %}
+                        {{ item.description }}<br>
+                    {% endif %}
+                    Продавец: {{item.user.name}} <br>
+                    Стоимость: {{item.cost}} <br>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+          <h4> Здесь пока ничего нет </h4>
     {% endif %}
-    <br>
-    <h2> Товары пользователя </h2>
-    {% if current_user.is_authenticated and current_user.id == user.id %}
-        <a href="/add_trade" class="btn btn-dark">
-            Добавить Товар
-        </a> <br> <br>
-    {% endif %}
-    {% if user.trades %}
-        {% for item in user.trades %}
-        <div class="col-md6 border rounded">
-            <a href="/trade/{{ item.id }}"><h2>{{item.item}}</h2></a>
-            <div> {{item.description}} </div>
-        </div> <br>
-        {% endfor %}
-    {% else %}
-      <h4> Здесь пока ничего нет </h4>
-    {% endif %}
+    </div>
 {% endblock %}

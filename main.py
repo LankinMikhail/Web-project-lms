@@ -172,14 +172,16 @@ def add_trade():
         current_user.trades.append(trade)
         db_sess.merge(current_user)
         db_sess.commit()
+        db_sess = db_session.create_session()
+        trades = db_sess.query(Trade).all()
         file = request.files["image"]
         if file and allowed_file(file.filename):
             path = os.path.join("static/img/trades")
             if not os.path.exists(path):
                 os.mkdir(path)
-            if os.path.exists(f"{path}/{trade.id}"):
-                os.remove(f"{path}/{trade.id}")
-            file.save(f"{path}/{trade.id}")
+            if os.path.exists(f"{path}/{trades[-1].id}"):
+                os.remove(f"{path}/{trades[-1].id}")
+            file.save(f"{path}/{trades[-1].id}")
         return redirect('/')
     return render_template('trade_bd.html',
                            form=form, title="Добавление товара")
@@ -251,12 +253,12 @@ def logout():
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+    return render_template("error.html", error="Ошибка 404, страница не найдена")
 
 
 @app.errorhandler(400)
 def bad_request(_):
-    return make_response(jsonify({'error': 'Bad Request'}), 400)
+    return render_template("error.html", error="Ошибка 400, плохой запрос")
 
 
 if __name__ == '__main__':
